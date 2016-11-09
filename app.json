@@ -1,0 +1,7 @@
+{
+  "name": "mtheory",
+  "description": "Intelligent music theory trainer for AI final",
+  "image": "heroku/python",
+  "repository": "https://github.com/samachr/mtheory",
+  "keywords": ["python"]
+}
