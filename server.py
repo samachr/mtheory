@@ -39,8 +39,8 @@ def postresults(username):
 
 @app.route('/api/getdata/<username>', methods = ['GET'])
 def getdata(username):
-    return json.dumps(db.query("select * from userdata"))
-    # return jsonify(db.query("select * from userdata where username = %s", [username]))
+    # return json.dumps(db.query("select * from userdata"))
+    return jsonify(db.query("select * from userdata where username = %s", [username]))
 
 if __name__ == '__main__':
     app.run(host=ipaddr, port=port, debug=False)
