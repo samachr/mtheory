@@ -1,4 +1,4 @@
-function pianoController($scope) {
+function pianoController($scope, $http) {
   $scope.keyText = [];
   $scope.time = 0;
   $scope.timer = setInterval(function() {
@@ -35,10 +35,10 @@ function pianoController($scope) {
   };
 
   $scope.getNextNumber = function() {
-    if ($scope.exerciseNumber == $scope.exerciseSet.length) {
+    if ($scope.exerciseNumber == $scope.exerciseSet.length-1) {
       $scope.state = "keychoice";
       clearInterval($scope.timer);
-      serverConnect.reportResults($scope.results);
+      serverConnect.reportResults($scope.username || "test", $scope.results, $http);
     } else {
       $scope.exerciseNumber += 1;
       $scope.currentScaleDegree = $scope.exerciseSet[$scope.exerciseNumber];

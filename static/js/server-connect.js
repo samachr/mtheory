@@ -1,6 +1,6 @@
 serverConnect = {};
 
-
+(function(){
 serverConnect.getExercise = function() {
   var returnSet = [];
   var lastRand = 1;
@@ -12,9 +12,15 @@ serverConnect.getExercise = function() {
     returnSet.push(nextRand);
     lastRand = nextRand;
   }
-  return returnSet
+  return [returnSet[0]]
 }
 
-serverConnect.reportResults = function(results) {
-  console.log(results);
+serverConnect.reportResults = function(username, results, $http) {
+  $http.post('/api/report/'+username, {results: results}).then(function(response){
+    console.log('report success', response);
+  }, function(response){
+    console.log('report failure', response);
+  });
 }
+
+})();

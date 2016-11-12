@@ -45,6 +45,8 @@
       </tr>
     </table>
 
+    <input type="text" ng-model="username" />
+
     <select class="form-control" ng-model="currentKey" ng-change="updateKeyLabels()">
       <option value="{{$index}}" ng-repeat="keyname in commonLetterNames">
         {{keyname}}

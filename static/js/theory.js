@@ -1,4 +1,6 @@
 var theoryLayer = {};
+(function(){
+
 //                      0    1     2    3     4    5    6     7    8     9    10    11   12   13    14   15   16    17   18    19   20    21   22   23
 theoryLayer.noteLettersS = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 theoryLayer.noteLettersB = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B", "C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
@@ -40,3 +42,4 @@ theoryLayer.isWhite = function(keyNum) {
 theoryLayer.getNoteNameInKey = function(key, i) {
   theoryLayer.isSharpKey(key) ? theoryLayer.noteLettersS[i] : theoryLayer.noteLettersB[i];
 }
+})();
