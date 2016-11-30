@@ -4,55 +4,29 @@
 <head>
   <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
   <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.bundle.min.js"></script>
 </head>
 <meta name="viewport" content="width=device-width, user-scalable=no">
 <link rel="stylesheet" href="app.css">
 
 <body ng-controller="pianoController" ng-init="getAudio()" ng-cloak>
   <div class="container">
-
-    <h3 class="text-center">
-      {{infoText}}
-    </h3>
-    <table ng-if="currentKey >= 0" class="table">
-      <thead>
-        <th>
-          Correct Answers
-        </th>
-        <th>
-          Percent Correct
-        </th>
-        <th>
-          Correct Per Minute
-        </th>
-        <th>
-          Elapsed Time (Seconds)
-        </th>
-      </thead>
-      <tr>
-        <td>
-          {{correctAnswers}}
-        </td>
-        <td>
-          {{(correctAnswers / totalAnswers * 100).toFixed(0)}}%
-        </td>
-        <td>
-          {{speed.toFixed(2)}} per minute
-        </td>
-        <td>
-          {{time}}
-        </td>
-      </tr>
-    </table>
+  <div style="padding:20px; width:100%; background-color:#eee; corner-radius:5px">
+    <button type="button" ng-click="start()">Start</button>
 
     <input type="text" ng-model="username" />
+    <button type="button" ng-click="update()">Update Chart</button>
+    <span> {{infoText}} </span>
+  </div>
 
-    <select class="form-control" ng-model="currentKey" ng-change="updateKeyLabels()">
-      <option value="{{$index}}" ng-repeat="keyname in commonLetterNames">
-        {{keyname}}
-      </option>
-    </select>
+  <!-- <select class="form-control" ng-model="currentKey" ng-change="updateKeyLabels()">
+    <option value="{{$index}}" ng-repeat="keyname in commonLetterNames">
+      {{keyname}}
+    </option>
+  </select> -->
 
+  <div ng-hide="state == 'keychoice'">
+    {{exerciseNumber + 1}} of {{exerciseSet.length}}
     <div id="pianobox">
       <button ng-repeat="key in whiteKeyList" class="white-key piano-key" id="key{{key}}" ng-click="play(key)">{{keyText[key]}}</button>
       <button ng-repeat="key in blackKeyList" class="black-key piano-key" id="key{{key}}" ng-click="play(key)">{{keyText[key]}}</button>
@@ -61,13 +35,17 @@
     <h3 ng-if="currentKey >= 0" class="text-center">
       What is {{currentScaleDegree}} in {{commonLetterNames[currentKey]}}?
     </h3>
+  </div>
 
-    {{results}}
 
-    <script src="js/sound.js"></script>
-    <script src="js/server-connect.js"></script>
-    <script src="js/theory.js"></script>
-    <script src="app.js"></script>
+  <div id="container" style="width: 100%;" ng-hide="state != 'keychoice'">
+      <canvas id="canvas" ng-hide="true"></canvas>
+  </div>
+
+  <script src="js/sound.js"></script>
+  <script src="js/server-connect.js"></script>
+  <script src="js/theory.js"></script>
+  <script src="app.js"></script>
 
 </body>
 

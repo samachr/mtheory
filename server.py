@@ -12,12 +12,12 @@ rows = db.query("""SELECT %s from userdata""", ['id'])
 ipaddr = os.getenv("IP", "0.0.0.0")
 port = int(os.getenv("PORT", 8080))
 
-@app.route('/api/report/<username>', methods = ['POST', 'GET'])
+@app.route('/api/report/<username>', methods = ['POST'])
 def postresults(username):
     global db
     results = request.get_json()['results']
     for result in results:
-        previous = db.query("select * from userdata where username = %s and key = %s and scaledegree = %s", [username, result["key"], result["scaledegree"]])
+        previous = db.query("select * from userdata where username = %s and key = %s and scaledegree = %s", [username, str(result["key"]), result["scaledegree"]])
         if len(previous) == 0:
             db.insert("insert into userdata (username, key, scaledegree, totalanswered, totalcorrect, averagetime) values(%s, %s, %s, %s, %s, %s)",
                 [username, result['key'], result['scaledegree'], 1, 1 if result['correct'] else 0, result['time']])
@@ -37,10 +37,27 @@ def postresults(username):
 
     return json.dumps(results)
 
-@app.route('/api/getdata/<username>', methods = ['GET'])
+@app.route('/api/report/<username>', methods = ['GET'])
 def getdata(username):
-    # return json.dumps(db.query("select * from userdata"))
-    return jsonify(db.query("select * from userdata where username = %s", [username]))
+    return jsonify(db.query("select * from userdata where username = %s order by key", [username]))
+
+@app.route('/api/exercises/<username>', methods = ['GET'])
+def getExercise(username):
+    userdata = db.query("select * from userdata where username = %s order by key", [username])
+    all_possible = {}
+    for keynum in xrange(12):
+        for scaledegree in xrange(1, 8):
+            all_possible[keynum, scaledegree] = float("inf")
+
+    for data in userdata:
+        all_possible[int(data[2]), data[3]] = data[6] - data[5]
+
+    next_set = []
+    for data in sorted(all_possible, key=all_possible.get, reverse=True)[:5]:
+        next_set.append({"key": data[0], "scaledegree": data[1]})
+
+    return jsonify(next_set)
+
 
 if __name__ == '__main__':
     app.run(host=ipaddr, port=port, debug=False)

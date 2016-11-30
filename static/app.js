@@ -9,19 +9,30 @@ function pianoController($scope, $http) {
   }, 1000);
   $scope.results = [];
   $scope.currentScaleDegree = 1;
-  $scope.infoText = "Select a key to begin.."
-  $scope.exerciseSet = serverConnect.getExercise();
-  $scope.exerciseNumber = 0;
+  $scope.infoText = "Enter your username.."
+
+  $scope.exerciseSet = [];
+  $scope.exerciseNumber = -1;
   $scope.commonLetterNames = theoryLayer.commonLetterNames;
   $scope.whiteKeyList = theoryLayer.whiteKeyList;
   $scope.blackKeyList = theoryLayer.blackKeyList;
   $scope.state = "keychoice";
 
+  $scope.start = function() {
+    serverConnect.getExercise($scope.username, $http, function(exercises){
+      $scope.exerciseSet = exercises;
+      $scope.updateKeyLabels();
+      $scope.getNextNumber();
+
+    });
+  }
+
   $scope.updateKeyLabels = function() {
+    $scope.going = true;
     $scope.totalAnswers = 0;
     $scope.correctAnswers = 0;
     $scope.time = 0;
-    $scope.infoText = "Time is ticking!";
+    $scope.infoText = "";
     $scope.lastTimestamp = Date.now();
 
     for (var i = 0; i < 24; i++) {
@@ -38,10 +49,16 @@ function pianoController($scope, $http) {
     if ($scope.exerciseNumber == $scope.exerciseSet.length-1) {
       $scope.state = "keychoice";
       clearInterval($scope.timer);
-      serverConnect.reportResults($scope.username || "test", $scope.results, $http);
+      $scope.exerciseNumber = -1;
+      $scope.infoText = "Reporting Results"
+      serverConnect.reportResults($scope.username || "test", $scope.results, $http, function(response){
+        $scope.update();
+      });
     } else {
       $scope.exerciseNumber += 1;
-      $scope.currentScaleDegree = $scope.exerciseSet[$scope.exerciseNumber];
+      $scope.currentKey = $scope.exerciseSet[$scope.exerciseNumber].key;
+      $scope.currentScaleDegree = $scope.exerciseSet[$scope.exerciseNumber].scaledegree;
+      $scope.updateKeyLabels();
       $scope.lastTimestamp = Date.now();
     }
   };
@@ -90,4 +107,111 @@ function pianoController($scope, $http) {
     }
     lock[keyPressed]--;
   }
+  $scope.chartColors = {
+    red: 'rgb(255, 99, 132)',
+    orange: 'rgb(255, 159, 64)',
+    yellow: 'rgb(255, 205, 86)',
+    green: 'rgb(75, 192, 192)',
+    blue: 'rgb(54, 162, 235)',
+    purple: 'rgb(153, 102, 255)',
+    grey: 'rgb(231,233,237)'
+  };
+
+  $scope.chartdata = {
+    labels: ["C", "Db", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"],
+    datasets: [{
+        label: '1',
+        backgroundColor: $scope.chartColors.red,
+        borderColor: $scope.chartColors.red,
+        borderWidth: 1,
+        data: [ ]
+    }, {
+        label: '2',
+        backgroundColor: $scope.chartColors.orange,
+        borderColor: $scope.chartColors.orange,
+        borderWidth: 1,
+        data: [ ]
+    }, {
+        label: '3',
+        backgroundColor: $scope.chartColors.yellow,
+        borderColor: $scope.chartColors.yellow,
+        borderWidth: 1,
+        data: [ ]
+    }, {
+        label: '4',
+        backgroundColor: $scope.chartColors.green,
+        borderColor: $scope.chartColors.green,
+        borderWidth: 1,
+        data: [ ]
+    }, {
+        label: '5',
+        backgroundColor: $scope.chartColors.purple,
+        borderColor: $scope.chartColors.purple,
+        borderWidth: 1,
+        data: [ ]
+    }, {
+        label: '6',
+        backgroundColor: $scope.chartColors.grey,
+        borderColor: $scope.chartColors.grey,
+        borderWidth: 1,
+        data: [ ]
+    }, {
+        label: '7',
+        backgroundColor: $scope.chartColors.blue,
+        borderColor: $scope.chartColors.blue,
+        borderWidth: 1,
+        data: [ ]
+    }]
+  };
+
+  $scope.chart = new Chart(document.getElementById("canvas").getContext("2d"), {
+      type: 'bar',
+      data: $scope.chartdata,
+      options: {
+          responsive: true,
+          legend: {
+              position: 'bottom',
+          },
+          title: {
+              display: true,
+              text: 'Progress'
+          }
+      }
+  });
+  $scope.update = function() {
+
+    $scope.chartdata.datasets.forEach(function(dataset){
+      dataset.data = [];
+    });
+    $scope.infoText = "Updating chart..";
+    $scope.chart.update();
+
+    serverConnect.getReport($scope.username, $http, function(data){
+      var timedata = {};
+
+      data.forEach(function(item){
+        var key = parseInt(item[2]);
+        var scaledegree = item[3];
+        var time = item[6];
+        if (timedata[key] == undefined) {
+          timedata[key] = {};
+          timedata[key][scaledegree] = time;
+        } else {
+          timedata[key][scaledegree] = time;
+        }
+      });
+
+      for (var i = 0; i < 12; i++) {
+        for (var j = 1; j < 8; j++) {
+          if (timedata[i] != undefined && timedata[i][j] != undefined) {
+            $scope.chartdata.datasets[j-1].data.push(timedata[i][j]);
+          } else {
+            $scope.chartdata.datasets[j-1].data.push(0);
+          }
+        }
+      }
+      $scope.chart.update();
+      $scope.infoText = "Chart Ready!";
+    });
+  };
 }
