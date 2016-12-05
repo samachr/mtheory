@@ -6,6 +6,7 @@
   <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.bundle.min.js"></script>
 </head>
+
 <meta name="viewport" content="width=device-width, user-scalable=no">
 <link rel="stylesheet" href="app.css">
 
@@ -25,24 +26,24 @@
     </option>
   </select> -->
 
-  <div ng-hide="state == 'keychoice'">
+  <div ng-hide="state == 'ready'">
     {{exerciseNumber + 1}} of {{exerciseSet.length}}
     <div id="pianobox">
       <button ng-repeat="key in whiteKeyList" class="white-key piano-key" id="key{{key}}" ng-click="play(key)">{{keyText[key]}}</button>
       <button ng-repeat="key in blackKeyList" class="black-key piano-key" id="key{{key}}" ng-click="play(key)">{{keyText[key]}}</button>
     </div>
 
-    <h3 ng-if="currentKey >= 0" class="text-center">
+    <h3 class="text-center">
       What is {{currentScaleDegree}} in {{commonLetterNames[currentKey]}}?
     </h3>
   </div>
 
 
-  <div id="container" style="width: 100%;" ng-hide="state != 'keychoice'">
+  <div id="container" style="width: 100%;" ng-hide="state != 'ready'">
       <canvas id="canvas" ng-hide="true"></canvas>
   </div>
 
-  <script src="js/sound.js"></script>
+  <!-- <script src="js/sound.js"></script> -->
   <script src="js/server-connect.js"></script>
   <script src="js/theory.js"></script>
   <script src="app.js"></script>

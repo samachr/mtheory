@@ -56,5 +56,3 @@ soundLayer = {};
 
   function BufferLoader(o, r, e) { this.context = o, this.urlList = r, this.onload = e, this.bufferList = new Array, this.loadCount = 0 } BufferLoader.prototype.loadBuffer = function(o, r) { var e = new XMLHttpRequest; e.open("GET", o, !0), e.responseType = "arraybuffer"; var t = this; e.onload = function() { t.context.decodeAudioData(e.response, function(e) { return e ? (t.bufferList[r] = e, void(++t.loadCount == t.urlList.length && t.onload(t.bufferList))) : void alert("error decoding file data: " + o) }, function(o) { console.error("decodeAudioData error", o) }) }, e.onerror = function() { alert("BufferLoader: XHR error") }, e.send() }, BufferLoader.prototype.load = function() { for (var o = 0; o < this.urlList.length; ++o) this.loadBuffer(this.urlList[o], o) };
 })();
-
-soundLayer.getAudio(function(){}, function(){});

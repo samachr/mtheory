@@ -1,22 +1,17 @@
 function pianoController($scope, $http) {
   $scope.keyText = [];
-  $scope.time = 0;
-  // $scope.timer = setInterval(function() {
-	// 	$scope.$apply(function() {
-	// 		$scope.time++;
-	//     $scope.speed = $scope.correctAnswers / $scope.time * 60;
-	// 	});
-  // }, 1000);
   $scope.results = [];
   $scope.currentScaleDegree = 1;
   $scope.infoText = "Enter your username.."
+
+  // soundLayer.getAudio(function(){}, function(){});
 
   $scope.exerciseSet = [];
   $scope.exerciseNumber = -1;
   $scope.commonLetterNames = theoryLayer.commonLetterNames;
   $scope.whiteKeyList = theoryLayer.whiteKeyList;
   $scope.blackKeyList = theoryLayer.blackKeyList;
-  $scope.state = "keychoice";
+  $scope.state = "ready";
 
   $scope.start = function() {
     serverConnect.getExercise($scope.username, $http, function(exercises){
@@ -30,7 +25,6 @@ function pianoController($scope, $http) {
     $scope.going = true;
     $scope.totalAnswers = 0;
     $scope.correctAnswers = 0;
-    $scope.time = 0;
     $scope.infoText = "";
     $scope.lastTimestamp = Date.now();
 
@@ -46,8 +40,7 @@ function pianoController($scope, $http) {
 
   $scope.getNextNumber = function() {
     if ($scope.exerciseNumber == $scope.exerciseSet.length-1) {
-      $scope.state = "keychoice";
-      // clearInterval($scope.timer);
+      $scope.state = "ready";
       $scope.exerciseNumber = -1;
       $scope.infoText = "Reporting Results"
       serverConnect.reportResults($scope.username || "test", $scope.results, $http, function(response){
@@ -63,28 +56,22 @@ function pianoController($scope, $http) {
   };
 
   $scope.play = function(noteNumber) {
-    // console.log("playing noteNumber" + noteNumber);
     if ($scope.keyText[noteNumber] == "") return;
-    // $scope.keysounds[noteNumber].currentTime = 0;
-    soundLayer.playKey(noteNumber);
+    // soundLayer.playKey(noteNumber);
 
+    var keyElement = document.getElementById("key" + noteNumber);
     if (theoryLayer.isCorrect($scope.currentScaleDegree, $scope.currentKey, noteNumber)) {
       $scope.infoText = "Got it Right!";
       $scope.results.push({key:$scope.currentKey, scaledegree: $scope.currentScaleDegree, time: Date.now() - $scope.lastTimestamp, correct: true })
       $scope.getNextNumber();
 
-      var keyElement = document.getElementById("key" + noteNumber);
       keyElement.style.background = "green";
       $scope.correctAnswers += 1;
-
     } else {
-      if ($scope.currentKey >= 0) {
         $scope.infoText = "Try Again";
-        $scope.results.push({key:$scope.currentKey, scaledegree: $scope.currentScaleDegree, time: Date.now() - $scope.lastTimestamp, correct: false })
+        // $scope.results.push({key:$scope.currentKey, scaledegree: $scope.currentScaleDegree, time: Date.now() - $scope.lastTimestamp, correct: false })
         keyElement.style.background = "red";
-      } else {
-        keyElement.style.background = "#2e3436";
-      }
+
     }
 
     $scope.totalAnswers += 1;
@@ -106,6 +93,7 @@ function pianoController($scope, $http) {
     }
     lock[keyPressed]--;
   }
+
   $scope.chartColors = {
     red: 'rgb(255, 99, 132)',
     orange: 'rgb(255, 159, 64)',
