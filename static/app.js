@@ -1,12 +1,12 @@
 function pianoController($scope, $http) {
   $scope.keyText = [];
   $scope.time = 0;
-  $scope.timer = setInterval(function() {
-		$scope.$apply(function() {
-			$scope.time++;
-	    $scope.speed = $scope.correctAnswers / $scope.time * 60;
-		});
-  }, 1000);
+  // $scope.timer = setInterval(function() {
+	// 	$scope.$apply(function() {
+	// 		$scope.time++;
+	//     $scope.speed = $scope.correctAnswers / $scope.time * 60;
+	// 	});
+  // }, 1000);
   $scope.results = [];
   $scope.currentScaleDegree = 1;
   $scope.infoText = "Enter your username.."
@@ -23,7 +23,6 @@ function pianoController($scope, $http) {
       $scope.exerciseSet = exercises;
       $scope.updateKeyLabels();
       $scope.getNextNumber();
-
     });
   }
 
@@ -48,7 +47,7 @@ function pianoController($scope, $http) {
   $scope.getNextNumber = function() {
     if ($scope.exerciseNumber == $scope.exerciseSet.length-1) {
       $scope.state = "keychoice";
-      clearInterval($scope.timer);
+      // clearInterval($scope.timer);
       $scope.exerciseNumber = -1;
       $scope.infoText = "Reporting Results"
       serverConnect.reportResults($scope.username || "test", $scope.results, $http, function(response){

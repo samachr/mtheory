@@ -2,19 +2,16 @@ import os
 import json
 import db_utils
 import simplejson as json
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, redirect
 app = Flask(__name__, static_url_path="")
-
 db = db_utils.DBconnector(os.environ["DATABASE_URL"])
 
-rows = db.query("""SELECT %s from userdata""", ['id'])
-
-ipaddr = os.getenv("IP", "0.0.0.0")
-port = int(os.getenv("PORT", 8080))
+@app.route('/')
+def index_redirect():
+    return redirect('/index.html')
 
 @app.route('/api/report/<username>', methods = ['POST'])
 def postresults(username):
-    global db
     results = request.get_json()['results']
     for result in results:
         previous = db.query("select * from userdata where username = %s and key = %s and scaledegree = %s", [username, str(result["key"]), result["scaledegree"]])
@@ -42,11 +39,11 @@ def postresults(username):
     return json.dumps(results)
 
 @app.route('/api/report/<username>', methods = ['GET'])
-def getdata(username):
+def get_data(username):
     return jsonify(db.query("select * from userdata where username = %s order by key", [username]))
 
 @app.route('/api/exercises/<username>', methods = ['GET'])
-def getExercise(username):
+def get_exercise(username):
     userdata = db.query("select * from userdata where username = %s order by key", [username])
     all_possible = {}
     for keynum in xrange(12):
@@ -62,6 +59,5 @@ def getExercise(username):
 
     return jsonify(next_set)
 
-
 if __name__ == '__main__':
-    app.run(host=ipaddr, port=port, debug=False)
+    app.run(host=os.getenv("IP", "0.0.0.0"), port=int(os.getenv("PORT", 8080)), debug=False)
