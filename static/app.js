@@ -1,18 +1,18 @@
 function pianoController($scope, $http) {
-  $scope.keyText = [];
-  $scope.results = [];
+  $scope.commonLetterNames = theoryLayer.commonLetterNames;
+  $scope.whiteKeyList = theoryLayer.whiteKeyList;
+  $scope.blackKeyList = theoryLayer.blackKeyList;
+
   $scope.currentScaleDegree = 1;
   $scope.infoText = "Enter your username.."
 
   // soundLayer.getAudio(function(){}, function(){});
 
-  $scope.exerciseSet = [];
   $scope.exerciseNumber = -1;
-  $scope.commonLetterNames = theoryLayer.commonLetterNames;
-  $scope.whiteKeyList = theoryLayer.whiteKeyList;
-  $scope.blackKeyList = theoryLayer.blackKeyList;
   $scope.state = "ready";
 
+  $scope.exerciseSet = [];
+  $scope.results = [];
   $scope.start = function() {
     serverConnect.getExercise($scope.username, $http, function(exercises){
       $scope.exerciseSet = exercises;
@@ -21,10 +21,9 @@ function pianoController($scope, $http) {
     });
   }
 
+  $scope.keyText = [];
   $scope.updateKeyLabels = function() {
     $scope.going = true;
-    $scope.totalAnswers = 0;
-    $scope.correctAnswers = 0;
     $scope.infoText = "";
     $scope.lastTimestamp = Date.now();
 
@@ -66,7 +65,6 @@ function pianoController($scope, $http) {
       $scope.getNextNumber();
 
       keyElement.style.background = "green";
-      $scope.correctAnswers += 1;
     } else {
         $scope.infoText = "Try Again";
         // $scope.results.push({key:$scope.currentKey, scaledegree: $scope.currentScaleDegree, time: Date.now() - $scope.lastTimestamp, correct: false })
@@ -74,14 +72,12 @@ function pianoController($scope, $http) {
 
     }
 
-    $scope.totalAnswers += 1;
 
     lock[noteNumber]++;
     document.getElementById("key" + noteNumber).style.color = "white";
     setTimeout(function() {
       clearAnimation(noteNumber, (theoryLayer.isWhite(noteNumber)) ? "white" : "black");
     }, 1000);
-
   };
 
   var lock = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -152,21 +148,35 @@ function pianoController($scope, $http) {
   };
 
   $scope.chart = new Chart(document.getElementById("canvas").getContext("2d"), {
-      type: 'bar',
-      data: $scope.chartdata,
-      options: {
-          responsive: true,
-          legend: {
-              position: 'bottom',
-          },
-          title: {
-              display: true,
-              text: 'Progress'
-          }
+    type: 'bar',
+    data: $scope.chartdata,
+    scaleOverride:true,
+    scaleSteps:10,
+    scaleStartValue:1000,
+    scaleStepWidth:1000,
+    options: {
+      scales: {
+       yAxes: [{
+         scaleLabel: {
+           display: true,
+           labelString: 'Average Response time (ms)'
+         },
+         ticks: {
+           min: 0,
+           max: 10000
+         }
+       }]
+      },
+      responsive: true,
+      legend: { position: 'bottom' },
+      title: {
+          display: true,
+          text: 'Current Moving Average Response Time for Each Question (smaller is better)'
       }
+    }
   });
-  $scope.update = function() {
 
+  $scope.update = function() {
     $scope.chartdata.datasets.forEach(function(dataset){
       dataset.data = [];
     });
